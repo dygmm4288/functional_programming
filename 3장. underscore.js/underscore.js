@@ -147,4 +147,53 @@ _.push_to = function (val, obj) {
 };
 _.noop = function () {};
 _.map = bloop(_.array, _.push_to);
-_.each = bloop(_.identity, _noop);
+_.each = bloop(_.identity, _.noop);
+
+_.keys = function (data) {
+    return data ? Object.keys(data) : [];
+};
+
+_.isOjbect = function (obj) {
+    const type = typeof obj;
+    return type === 'function' || (type === 'object' && !!obj);
+};
+
+_.keys = function (obj) {
+    return _.isOjbect(obj) ? Object.keys(obj) : [];
+};
+
+console.log(_.keys({ name: 'PJ' }));
+
+console.log(_.keys([1, 2, 3]));
+console.log(_.keys(10));
+console.log(_.keys(null));
+
+function bloop(new_data, body) {
+    return function (data, iteratee) {
+        const result = new_data(data);
+        if (isArrayLike(data)) {
+            for (let i = 0, len = data.length; i < len; i++) {
+                body(iteratee(data[i], i, data), result);
+            }
+        } else {
+            for (
+                let i = 0, keys = _.keys(data), len = keys.length;
+                i < len;
+                i++
+            ) {
+                body(iteratee(data[keys[i]], keys[i], data), result);
+            }
+        }
+        return result;
+    };
+}
+
+_.map = bloop(_.array, _.push_to);
+_.each = bloop(_.identity, _.noop);
+
+console.log(
+    _.map({ a: 3, b: 2, c: 1 }, function (v) {
+        return v * 2;
+    }),
+);
+_.each({ id: 5, name: 'JE', age: 27 }, console.log);
