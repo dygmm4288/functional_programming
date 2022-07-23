@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="kr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <div
+            class="box"
+            style="
+                position: relative;
+                background: red;
+                width: 50px;
+                height: 50px;
+            "
+        ></div>
+        <script>
+            const _ = {};
+            _.getLength = (list) => {
+                return list === null ? void 0 : list.length;
+            };
+            _.isArrayLike = (list) => {
+                const length = _.getLength(list);
+                const MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
+                return (
+                    typeof length === 'number' &&
+                    length >= 0 &&
+                    length <= MAX_ARRAY_INDEX
+                );
+            };
+            function bloop(new_data, body, stopper, is_reduce) {
+                return function (data, iter_predi, opt1) {
+                    const result = new_data(data);
+                    let memo = is_reduce ? opt1 : undefined;
+                    iter_predi = iter_predi || _.idtt;
+                    if (_.isArrayLike(data)) {
+                        for (let i = 0, len = data.length; i < len; i++) {
+                            memo = is_reduce
+                                ? iter_predi(memo, data[i], i, data)
+                                : iter_predi(data[i], i, data);
+                            if (!stopper) body(memo, result, data[i], i);
+                            else if (stopper(memo))
+                                return body(memo, result, data[i], i);
+                        }
+                    } else {
+                        for (
+                            let i = 0, keys = _.keys(data), len = keys.length;
+                            i < len;
+                            i++
+                        ) {
+                            memo = is_reduce
+                                ? iter_predi(memo, data[keys[i]], keys[i], i)
+                                : iter_predi(data[keys[i]], keys[i], i);
+                            if (!stopper) body(memo, result, data[i], i);
+                            else if (stopper(memo))
+                                return body(memo, result, data[i], i);
+                        }
+                    }
+                    return is_reduce ? memo : result;
+                };
+            }
+            _.array = () => [];
+            _.push_to = (val, obj) => {
+                obj.push(val);
+                return val;
+            };
+            _.map = bloop(_.array, _.push_to);
+            _.idtt = (x) => x;
+            _.values = (list) => _.map(list, _.idtt);
+            _.toArray = (list) => (Array.isArray(list) ? list : _.values(list));
+            _.rest = function (list, num) {
+                return _.toArray(list).slice(num || 1);
+            };
+            const method = function (method) {
+                // args는 _css 중 어느 속성을 변경시킬 지 저장하는 변수
+                // arguments[0]은 현재 여기서는 method이다.
+                const args = _.rest(arguments);
+                return function (obj) {
+                    return method.apply(obj, args.concat(_.rest(arguments)));
+                };
+            };
+            _.css = function (name, value) {
+                if (!value) {
+                    return this.style[name];
+                }
+                this.style[name] = value;
+                return value;
+            };
+
+            const bg = method(_.css, 'background-color');
+            const width = method(_.css, 'width');
+
+            const $box = document.querySelector('.box');
+            width($box, '200px');
+            console.log(width($box));
+            // css 를 적용시키는 함수
+            // elem.style[name] = value
+            console.log(bg($box, 'yellow'));
+            console.log(bg($box, 'purple'));
+            console.log(bg($box));
+        </script>
+    </body>
+</html>
